@@ -17,6 +17,7 @@ public class Todo {
         this(null, summary, description);
     }
 
+
     /**
      * ID might be null!
      */
