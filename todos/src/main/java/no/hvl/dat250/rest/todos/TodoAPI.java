@@ -25,7 +25,7 @@ public class TodoAPI {
         after((request, response) -> response.type("application/json"));
 
 
-        post("/todos", (request, response) -> {
+        post("/echo/todos", (request, response) -> {
             Todo todo = gson.fromJson(request.body(), Todo.class);
             final Long id = Long.valueOf(todoList.size());
             String summary = todo.getSummary();
@@ -33,17 +33,20 @@ public class TodoAPI {
             if (todo.getId() == null) {
                 todo = new Todo(id, summary, description);
             }
+            //System.out.print(gson.toJson(todoList.values()));
+            //System.out.print(todo);
             todoList.put(id, todo);
             String jsonInString = gson.toJson(todo);
             return jsonInString;
         });
 
-        get("/todos", (request, response) -> new Gson().toJson(todoList.values()));
+        get("/echo/todos", (request, response) -> new Gson().toJson(todoList.values()));
 
         get("/todos/:id", (request, response) -> {
+
             final Long id;
             try {
-                id = Long.parseLong(request.params("id"));
+                id = Long.parseLong(request.params(":id"));
             } catch (NumberFormatException e) {
                 return String.format("The id \"%s\" is not a number!", request.params("id"));
             }
@@ -51,6 +54,7 @@ public class TodoAPI {
             if (todo == null) {
                 return String.format("Todo with the id  \"%s\" not found!", id);
             }
+
             String jsonInString = gson.toJson(todo);
             return jsonInString;
         });
@@ -59,7 +63,7 @@ public class TodoAPI {
         put("/todos/:id", (request, response) -> {
             final Long id;
             try {
-                id = Long.parseLong(request.params("id"));
+                id = Long.parseLong(request.params(":id"));
             } catch(NumberFormatException e){
                 return String.format("The id \"%s\" is not a number!", request.params("id"));
             }
@@ -72,14 +76,14 @@ public class TodoAPI {
             String description = putTodo.getDescription();
             todo = new Todo(id, summary, description);
             todoList.put(id, todo);
-            return null;
+            return gson.toJson(todoList.get(id));
 
         });
 
-        delete("/todos/:id", (request, response) -> {
+        delete("/echo/todos/:id", (request, response) -> {
             final Long id;
             try {
-                id = Long.parseLong(request.params("id"));
+                id = Long.parseLong(request.params(":id"));
             } catch (NumberFormatException e){
                 return String.format("The id \"%s\" is not a number!", request.params("id"));
             }
@@ -87,8 +91,9 @@ public class TodoAPI {
             if (todo == null){
                 return String.format("Todo with the id  \"%s\" not found!", id);
             }
+            Todo copy = todo;
             todoList.remove(id);
-            return null;
+            return gson.toJson(copy);
 
         });
 
